@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import picpac
-import fcn_nets as nets
+import cls_nets as nets
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -17,12 +17,15 @@ flags.DEFINE_string('db', 'db', 'training db')
 flags.DEFINE_string('val_db', None, 'validation db')
 flags.DEFINE_integer('classes', 2, 'number of classes')
 flags.DEFINE_string('mixin', None, 'mix-in training db')
-flags.DEFINE_string('annotate', 'json', 'json or image')
 flags.DEFINE_integer('channels', 3, '')
 flags.DEFINE_integer('max_size', None, '')
 
+flags.DEFINE_integer('resize_width', None, '')
+flags.DEFINE_integer('resize_height', None, '')
+flags.DEFINE_integer('batch', 1, 'Batch size.  ')
+
 flags.DEFINE_string('net', 'resnet_v1_50', 'architecture')
-flags.DEFINE_string('model', 'fcn_model', 'model directory')
+flags.DEFINE_string('model', 'cls_model', 'model directory')
 flags.DEFINE_string('resume', None, 'resume training from this model')
 flags.DEFINE_integer('max_to_keep', 100, '')
 
@@ -60,11 +63,12 @@ def main (_):
 
     X = tf.placeholder(tf.float32, shape=(None, None, None, FLAGS.channels), name="images")
     # ground truth labels
-    Y = tf.placeholder(tf.float32, shape=(None, None, None, 1), name="labels")
+    Y = tf.placeholder(tf.float32, shape=(None, ), name="labels")
     is_training = tf.placeholder(tf.bool, name="is_training")
 
+
     # load network
-    logits, stride = getattr(nets, FLAGS.net)(X, is_training, FLAGS.classes)
+    logits = getattr(nets, FLAGS.net)(X, is_training, FLAGS.classes)
 
     loss, metrics = fcn_loss(logits, Y)
 
@@ -82,9 +86,7 @@ def main (_):
     picpac_config = dict(seed=2017,
                 shuffle=True,
                 reshuffle=True,
-                batch=1,
-                round_div=stride,
-                annotate=FLAGS.annotate,    # json by default
+                batch=FLAGS.batch,
                 channels=FLAGS.channels,    # 3 by default
                 stratify=True,
                 pert_colorspace='SAME',     # do not change colorspace
@@ -106,6 +108,13 @@ def main (_):
         picpac_config['mixin'] = FLAGS.mixin
         picpac_config['mixin_group_delta'] = 1
         pass
+    # do we want to apply below to validation images?
+    if not FLAGS.resize_width is None:
+        config['resize_width'] = FLAGS.resize_width
+    if not FLAGS.resize_height is None:
+        config['resize_height'] = FLAGS.resize_height
+    if not FLAGS.max_size is None:
+        config['max_size'] = FLAGS.max_size
 
     # load training db
     assert FLAGS.db and os.path.exists(FLAGS.db)
