@@ -1,5 +1,10 @@
 # picpac-demos
 
+## Files
+- io-example.py:  How to import images into picpac database.
+- cls-train.py: How to train classification models.
+- fcn-train.py: How to train segmentation models with FCN.
+
 ## Prerequisites
 - Tensorflow > 1.3
 - Picpac
