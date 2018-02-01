@@ -36,7 +36,7 @@ Highlights:
 - Picpac
 
 ```
-sudo apt-get install libopencv-dev libboost-all-dev libgoogle-glog-dev
+sudo apt-get install libopencv-dev python-opencv libboost-all-dev libgoogle-glog-dev
 git clone https://github.com/aaalgo/picpac
 cd picpac
 git submodule init
@@ -44,4 +44,7 @@ git submodule update
 python setup build
 sudo python setup install
 ```
-
+- Other python dependencies
+```
+pip install numpy tqdm simplejson
+```
