@@ -13,7 +13,7 @@ deep-learning model training.
 
 Highlights:
 - Asynchronous image decoding & augmentation with multi-threads,
-  minimize GPU waiting on CPU.
+  minimizing GPU waiting on CPU.
 - Small databases are fully cached in memory.
 - Random shuffle of huge dataset on SSD storage (cache=False).
 - ImageNet 2015 down-sized (shorter edge to 255), mozjpeg-encoded and
