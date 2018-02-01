@@ -46,5 +46,5 @@ sudo python setup install
 ```
 - Other python dependencies
 ```
-pip install numpy tqdm simplejson
+pip install tqdm simplejson
 ```
