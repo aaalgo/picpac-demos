@@ -1,5 +1,26 @@
 # picpac-demos
 
+## What is PicPac?
+
+PicPac is an image database designed for streaming training
+examples into deep-learning frameworks.  It is written in
+C++ and has Python and Lua bindings, and is compatible with
+common frameworks like Tensorflow, MxNet, Torch and other
+frameworks based on Python.  The goal is to replace
+platform-specific database format with a generic, high-
+performance database that is specially-designed for
+deep-learning model training.
+
+Highlights:
+- Asynchronous image decoding & augmentation with multi-threads.
+- Small databases are fully cached in memory.
+- Random shuffle of huge dataset on SSD storage (cache=False).
+- ImageNet 2015 down-sized and preloaded in a [12G
+  database](http://www.aaalgo.com/picpac/datasets/ilsvrc/),
+ready for training.
+
+
+
 ## Files
 - io-example.py:  How to import images into picpac database.
 - cls-train.py: How to train classification models.
