@@ -16,7 +16,8 @@ Highlights:
 - Small databases are fully cached in memory.
 - Random shuffle of huge dataset on SSD storage (cache=False).
 - ImageNet 2015 down-sized and preloaded in a [12G
-  database](http://www.aaalgo.com/picpac/datasets/ilsvrc/),
+  database](http://www.aaalgo.com/picpac/datasets/ilsvrc/)(originally
+  155G),
 ready for training.
 
 
