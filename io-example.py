@@ -2,6 +2,11 @@
 
 # This file illustrates how to import records into picpac db and
 # how to read from the db.
+
+# Usually one either import images for classification or segmentation for
+# training purpose, even though both kinds of records are imported in this
+# example.
+
 from __future__ import absolute_import, division, print_function
 import os
 import cv2
