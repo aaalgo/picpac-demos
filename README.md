@@ -2,7 +2,7 @@
 
 ## What is PicPac?
 
-PicPac is an image database designed for streaming training
+[PicPac](https://github.com/aaalgo/picpac) is an image database designed for streaming training
 examples into deep-learning frameworks.  It is written in
 C++ and has Python and Lua bindings, and is compatible with
 common frameworks like Tensorflow, MxNet, Torch and other

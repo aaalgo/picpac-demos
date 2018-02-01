@@ -80,6 +80,7 @@ def main (_):
     saver = tf.train.Saver(max_to_keep=FLAGS.max_to_keep)
 
     picpac_config = dict(seed=2017,
+                cache=True,                 # set to False for large datasets
                 shuffle=True,
                 reshuffle=True,
                 batch=1,
