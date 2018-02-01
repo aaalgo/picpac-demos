@@ -10,6 +10,10 @@ fi
 
 if [ ! -f picpac-explorer ]
 then
+    echo "!!!!!!!!!!"
+    echo "Do you know that you can view the database with picpac-explorer?"
+    echo "./picpac-explorer $BN"
+    read
     wget http://www.aaalgo.com/picpac/binary/picpac-explorer
     chmod +x picpac-explorer
 fi

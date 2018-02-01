@@ -30,10 +30,6 @@ Highlights:
 
 - run-cifar10/nmist.py: Download pre-loaded database and train.
 
-Explore databases with
-[PicPac-Explorer](http://www.aaalgo.com/picpac/binary/picpac-explorer)(Automatically
-downloaded if you run either pre-loaded dataset.)
-
 ## Prerequisites
 - Tensorflow > 1.3
 - Picpac
