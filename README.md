@@ -20,7 +20,8 @@ Highlights:
   preloaded in a [12G
   database](http://www.aaalgo.com/picpac/datasets/ilsvrc/)(originally
   155G), ready for training.
-
+- Explore the database and check augmentation results with [PicPac
+  Explorer](http://www.aaalgo.com/picpac/binary/picpac-explorer).
 
 
 ## Files
