@@ -106,6 +106,8 @@ def main (_):
         picpac_config['mixin'] = FLAGS.mixin
         picpac_config['mixin_group_delta'] = 1
         pass
+    if not FLAGS.max_size is None:
+        config['max_size'] = FLAGS.max_size
 
     # load training db
     assert FLAGS.db and os.path.exists(FLAGS.db)
