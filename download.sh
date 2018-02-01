@@ -13,6 +13,8 @@ then
     echo "!!!!!!!!!!"
     echo "Do you know that you can view the database with picpac-explorer?"
     echo "./picpac-explorer $BN"
+    echo ""
+    echo "Press [ENTER] to continue..."
     read
     wget http://www.aaalgo.com/picpac/binary/picpac-explorer
     chmod +x picpac-explorer
