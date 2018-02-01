@@ -32,8 +32,9 @@ Highlights:
 - run-cifar10/nmist.py: Download pre-loaded database and train.
 
 ## Prerequisites
+- Ubuntu 16.04
 - Tensorflow > 1.3
-- Picpac
+- PicPac
 
 ```
 sudo apt-get install libopencv-dev python-opencv libboost-all-dev libgoogle-glog-dev
