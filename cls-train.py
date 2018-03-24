@@ -1,6 +1,7 @@
-#!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
+#!/usr/bin/env python3
 import os
+import sys
+sys.path.append('install/picpac/build/lib.linux-x86_64-%d.%d' % sys.version_info[:2])
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
 from tqdm import tqdm
@@ -9,6 +10,7 @@ import cv2
 import tensorflow as tf
 import picpac
 import cls_nets as nets
+print(picpac.__file__)
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -40,7 +42,7 @@ flags.DEFINE_integer('ckpt_epochs', 100, '')
 flags.DEFINE_integer('val_epochs', 100, '')
 
 
-def fcn_loss (logits, labels):
+def cls_loss (logits, labels):
 
     labels = tf.to_int32(labels)
     logits = tf.reshape(logits, (-1, FLAGS.classes))
@@ -70,7 +72,7 @@ def main (_):
     # load network
     logits = getattr(nets, FLAGS.net)(X, is_training, FLAGS.classes)
 
-    loss, metrics = fcn_loss(logits, Y)
+    loss, metrics = cls_loss(logits, Y)
 
     metric_names = [x.name[:-2] for x in metrics]
 
@@ -83,49 +85,58 @@ def main (_):
     init = tf.global_variables_initializer()
     saver = tf.train.Saver(max_to_keep=FLAGS.max_to_keep)
 
-    picpac_config = dict(seed=2017,
-                cache=True,                 # set to False for large datasets
-                shuffle=True,
-                reshuffle=True,
-                batch=FLAGS.batch,
-                channels=FLAGS.channels,    # 3 by default
-                stratify=True,
-                pert_colorspace='SAME',     # do not change colorspace
-                                            # which typically means BGR
-                                            # or HSV or Lab
-                pert_color1=20,
-                pert_color2=20,
-                pert_color3=20,
-                pert_angle=20,
-                pert_min_scale=0.9,
-                pert_max_scale=1.2,
-                pert_hflip=True,
-                pert_vflip=True,
-                channel_first=False # this is tensorflow specific
-                                    # Caffe's dimension order is different.
-                )
+    picpac_config = {"db": FLAGS.db,
+              "loop": True,
+              "shuffle": True,
+              "reshuffle": True,
+              "annotate": False,
+              "channels": FLAGS.channels,
+              "stratify": True,
+              "dtype": "float32",
+              "batch": FLAGS.batch,
+              "transforms": [
+                  {"type": "augment.flip", "horizontal": True, "vertical": False},
+                  {"type": "normalize", "mean": [0,1,2], "std": [3,4,5]},
+                  #{"type": "augment.rotate", "min":-10, "max":10},
+                  #{"type": "augment.scale", "min":0.7, "max":1.2},
+                  {"type": "clip", "size": 32, "shift": 4},
+                  #{"type": "colorspace", "code": "BGR2HSV", "mul0": 1.0/255},
+                  #{"type": "augment.add", "range":20},
+                  #{"type": "colorspace", "code": "HSV2BGR", "mul1": 255.0},
+              ]
+             }
+
     if not FLAGS.mixin is None:
-        assert os.path.exists(FLAGS.mixin)
-        picpac_config['mixin'] = FLAGS.mixin
-        picpac_config['mixin_group_delta'] = 1
-        pass
+        print("mixin support is incomplete in new picpac.")
+    #    assert os.path.exists(FLAGS.mixin)
+    #    picpac_config['mixin'] = FLAGS.mixin
+    #    picpac_config['mixin_group_delta'] = 1
+    #    pass
+
     # do we want to apply below to validation images?
+    '''
     if not FLAGS.resize_width is None:
         config['resize_width'] = FLAGS.resize_width
     if not FLAGS.resize_height is None:
         config['resize_height'] = FLAGS.resize_height
     if not FLAGS.max_size is None:
         config['max_size'] = FLAGS.max_size
+    '''
 
     # load training db
     assert FLAGS.db and os.path.exists(FLAGS.db)
-    stream = picpac.ImageStream(FLAGS.db, perturb=True, loop=True, **picpac_config)
+    stream = picpac.ImageStream(picpac_config)
 
     # load validation db
     val_stream = None
     if FLAGS.val_db:
+        val_config = {"db": FLAGS.val_db,
+                  "loop": False,
+                  "channels": FLAGS.channels,
+                  "dtype": "float32",
+                 }
         assert os.path.exists(FLAGS.val_db)
-        val_stream = picpac.ImageStream(FLAGS.val_db, perturb=False, loop=False, **picpac_config)
+        val_stream = picpac.ImageStream(val_config)
 
 
     config = tf.ConfigProto()
@@ -142,8 +153,8 @@ def main (_):
             start_time = time.time()
             avg = np.array([0] * len(metrics), dtype=np.float32)
             for _ in tqdm(range(FLAGS.epoch_steps), leave=False):
-                images, labels, _ = stream.next()
-                feed_dict = {X: images, Y: labels, is_training: True}
+                meta, image = stream.next()
+                feed_dict = {X: image, Y: meta.labels, is_training: True}
                 mm, _, = sess.run([metrics, train_op, ], feed_dict=feed_dict)
                 avg += np.array(mm)
                 pass
@@ -161,8 +172,8 @@ def main (_):
                 val_stream.reset()
                 avg = np.array([0] * len(metrics), dtype=np.float32)
                 C = 0
-                for images, labels, _ in val_stream:
-                    feed_dict = {X: images, Y: labels, is_training: False}
+                for meta, image in val_stream:
+                    feed_dict = {X: image, Y: meta.labels, is_training: False}
                     mm = sess.run(metrics, feed_dict=feed_dict)
                     avg += np.array(mm)
                     C += 1
