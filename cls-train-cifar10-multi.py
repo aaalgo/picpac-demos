@@ -58,7 +58,7 @@ flags.DEFINE_string('mixin', None, 'mix-in training db')
 flags.DEFINE_integer('channels', 3, '')
 flags.DEFINE_integer('size', 32, '')
 
-flags.DEFINE_integer('batch', 256, 'Batch size.  ')
+flags.DEFINE_integer('batch', 128, 'Batch size.  ')
 
 flags.DEFINE_string('net', 'resnet_18', 'architecture')
 flags.DEFINE_string('model', 'cls_model', 'model directory')
@@ -72,7 +72,7 @@ flags.DEFINE_float('decay_steps', 500, '')
 #
 flags.DEFINE_integer('max_steps', 200000, '')
 flags.DEFINE_integer('ckpt_epochs', 10, '')
-flags.DEFINE_integer('val_epochs', 1, '')
+flags.DEFINE_integer('val_epochs', 2, '')
 flags.DEFINE_integer('num_gpus', 2, '')
 
 
@@ -130,9 +130,10 @@ def main (_):
         is_training = tf.placeholder(tf.bool, name="is_training")
 
         global_step = tf.train.create_global_step()
-        rate = FLAGS.learning_rate
-        rate = tf.train.exponential_decay(rate, global_step, FLAGS.decay_steps, FLAGS.decay_rate, staircase=True)
-        optimizer = tf.train.MomentumOptimizer(learning_rate=rate, momentum=0.9)
+        #rate = FLAGS.learning_rate
+        #rate = tf.train.exponential_decay(rate, global_step, FLAGS.decay_steps, FLAGS.decay_rate, staircase=True)
+        #optimizer = tf.train.MomentumOptimizer(learning_rate=rate, momentum=0.9)
+        optimizer = tf.train.AdamOptimizer(0.0001)
 
         with slim.arg_scope([slim.conv2d],
                 weights_regularizer=slim.l2_regularizer(2.5e-4)), \
@@ -158,7 +159,7 @@ def main (_):
                         grads = optimizer.compute_gradients(loss)
                         all_grads.append(grads)
                         all_metrics.append(metrics)
-                        refs.append((decX, decY, loss, metrics))
+                        refs.append((decX, decY))
                         pass
                     pass
                 pass
@@ -172,7 +173,6 @@ def main (_):
         return ' '.join(['%s=%.3f' % (a, b) for a, b in zip(metric_names, list(avg))])
 
     #global_step = tf.Variable(0, name='global_step', trainable=False)
-    #optimizer = tf.train.AdamOptimizer(0.0001)
 
     #train_op = optimizer.minimize(loss, global_step=global_step)
     #train_op = slim.learning.create_train_op(loss, optimizer, global_step=global_step)
@@ -277,16 +277,17 @@ def main (_):
 
             # validation
 
-            X1, Y1, loss1, metrics1 = refs[0]
+            X1, Y1 = refs[0]
 
             if epoch and (epoch % FLAGS.val_epochs == 0) and not val_stream is None:
-                lr = sess.run(rate)
+                lr =0
+                #lr = sess.run(rate)
                 # evaluation
                 val_stream.reset()
                 avg = np.array([0] * len(metrics), dtype=np.float32)
                 for meta, image in val_stream:
                     feed_dict = {X1: image, Y1: meta.labels, is_training: False}
-                    mm = sess.run(metrics1, feed_dict=feed_dict)
+                    mm = sess.run(all_metrics[0], feed_dict=feed_dict)
                     avg += np.array(mm)
                     pass
                 avg /= avg[0]
